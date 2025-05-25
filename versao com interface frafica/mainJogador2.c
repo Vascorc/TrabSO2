@@ -1,3 +1,4 @@
+
 // === jogador2.c ===
 #include <stdio.h>
 #include <fcntl.h>
@@ -39,10 +40,12 @@ int main() {
         printJogo(Tabuleiro);
 
         printf("Jogador 2 (O), escolha a linha (1-3): ");
+        fflush(stdout);
         scanf("%d", &linha);
         linha--;
 
         printf("Escolha a coluna (1-3): ");
+        fflush(stdout);
         scanf("%d", &coluna);
         coluna--;
 
@@ -64,10 +67,7 @@ int main() {
             int fd = open("pipe_jogadores_menu", O_WRONLY);
             write(fd, "2", 1);
             close(fd);
-
-            execl("./menu", "menu", NULL);
-            perror("Erro ao voltar ao menu");
-            exit(1);
+            break;
         } else {
             char semVitoria = 'C';
             write(caminhoJ2, &semVitoria, 1);
@@ -77,7 +77,5 @@ int main() {
         sleep(1);
     }
 
-    execl("./menu", "menu", NULL);
-    perror("Erro ao voltar ao menu");
     return 0;
 }

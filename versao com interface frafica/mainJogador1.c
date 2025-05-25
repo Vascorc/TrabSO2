@@ -10,6 +10,10 @@
 int main() {
     int caminhoJ2 = open("pipe2to1", O_RDONLY);
     int caminhoJ1 = open("pipe1to2", O_WRONLY);
+    int estado_fd = open("pipe_menu_jogadores", O_RDONLY | O_NONBLOCK); // desbloqueia o menu
+    char dummy;
+    read(estado_fd, &dummy, 1);
+    close(estado_fd);
 
     if (caminhoJ1 < 0 || caminhoJ2 < 0) {
         perror("Erro ao abrir pipes");
@@ -28,10 +32,12 @@ int main() {
         printJogo(Tabuleiro);
 
         printf("Jogador 1 (X), escolha a linha (1-3): ");
+        fflush(stdout);
         scanf("%d", &linha);
         linha--;
 
         printf("Escolha a coluna (1-3): ");
+        fflush(stdout);
         scanf("%d", &coluna);
         coluna--;
 
@@ -53,17 +59,13 @@ int main() {
             int fd = open("pipe_jogadores_menu", O_WRONLY);
             write(fd, "1", 1);
             close(fd);
- 
-            execl("./menu", "menu", NULL);
-            perror("Erro ao voltar ao menu");
-            exit(1);
+            break;
         } else {
             char semVitoria = 'C';
             write(caminhoJ1, &semVitoria, 1);
         }
 
         write(caminhoJ1, Tabuleiro, sizeof(Tabuleiro));
-
         printf("Jogador 1: Esperando o Jogador 2 jogar...\n");
 
         char buffer;
@@ -83,7 +85,5 @@ int main() {
         sleep(1);
     }
 
-    execl("./menu", "menu", NULL);
-    perror("Erro ao voltar ao menu");
     return 0;
 }
