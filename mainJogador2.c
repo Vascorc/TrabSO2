@@ -1,4 +1,3 @@
-// === jogador2.c ===
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -26,6 +25,11 @@ int main()
     {
         char buffer;
         int bytesRead = read(caminhoJ1, &buffer, 1);
+        if (bytesRead == 0) {
+            // EOF detectado: adversário fechou pipe, sair
+            printf("Adversário terminou o jogo.\n");
+            break;
+        }
         if (bytesRead > 0 && buffer == 'V')
         {
             bytesRead = read(caminhoJ1, Tabuleiro, sizeof(Tabuleiro));
@@ -37,11 +41,16 @@ int main()
             }
             printf("Jogador 1 (X) ganhou!\n");
 
+            // Enviar resultado ao menu
             int fd = open("pipe_jogadores_menu", O_WRONLY);
-            write(fd, "1", 1);
-            close(fd);
+            if (fd >= 0) {
+                write(fd, "1", 1);
+                close(fd);
+            }
 
-            break;
+            close(caminhoJ1);
+            close(caminhoJ2);
+            exit(0);
         }
 
         bytesRead = read(caminhoJ1, Tabuleiro, sizeof(Tabuleiro));
@@ -77,16 +86,24 @@ int main()
         if (verificar_vitoria(Tabuleiro, peca))
         {
             printf("Jogador 2 (O) ganhou!\n");
+
+            // Enviar sinal de vitória
             char vitoria = 'V';
             write(caminhoJ2, &vitoria, 1);
 
+            // Enviar tabuleiro final ao jogador 1
+            write(caminhoJ2, Tabuleiro, sizeof(Tabuleiro));
+
+            // Enviar resultado ao menu
             int fd = open("pipe_jogadores_menu", O_WRONLY);
-            write(fd, "2", 1);
-            close(fd);
+            if (fd >= 0) {
+                write(fd, "2", 1);
+                close(fd);
+            }
 
-            sleep(1); // Dá tempo ao adversário para ler o pipe
-
-            break;
+            close(caminhoJ1);
+            close(caminhoJ2);
+            exit(0);
         }
         else
         {
