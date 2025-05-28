@@ -4,7 +4,19 @@
 void printJogo(char Tabuleiro[linhas][colunas]) {
     for (int i = 0; i < linhas; i++) {
         for (int j = 0; j < colunas; j++) {
-            printf(" %c ", Tabuleiro[i][j]);
+            char c = Tabuleiro[i][j];
+            if (c == 'X') {
+                textcolor(BRIGHT, RED, -1);
+                printf(" %c ", c);
+                textcolor(RESET, WHITE, -1);
+            } else if (c == 'O') {
+                textcolor(BRIGHT, GREEN, -1);
+                printf(" %c ", c);
+                textcolor(RESET, WHITE, -1);
+            } else {
+                printf("   ");
+            }
+
             if (j < colunas - 1) {
                 printf("|");
             }
@@ -14,8 +26,9 @@ void printJogo(char Tabuleiro[linhas][colunas]) {
             printf("---+---+---\n");
         }
     }
-    printf("\n");
 }
+
+
 
 int colocar_peca(char Tabuleiro[linhas][colunas], int linha, int coluna, char peca) {
     if (linha < 0 || linha >= linhas || coluna < 0 || coluna >= colunas) {
@@ -58,4 +71,17 @@ int verificar_vitoria(char tabuleiro[linhas][colunas], char jogador)
     }
 
     return 0;
+}
+
+
+void textcolor(int attr, int fg, int bg)
+{
+    char command[20];
+    if (bg == -1) {
+        // Fundo padrão do terminal (transparente)
+        sprintf(command, "%c[%d;%dm", 0x1B, attr, fg + 30);
+    } else {
+        sprintf(command, "%c[%d;%d;%dm", 0x1B, attr, fg + 30, bg + 40);
+    }
+    printf("%s", command);
 }

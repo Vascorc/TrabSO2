@@ -7,11 +7,13 @@
 #include "iniciarTabuleiro.h"
 #include "funcoesAjuda.h"
 
-int main() {
+int main()
+{
     int caminhoJ2 = open("pipe2to1", O_WRONLY);
     int caminhoJ1 = open("pipe1to2", O_RDONLY);
 
-    if (caminhoJ1 < 0 || caminhoJ2 < 0) {
+    if (caminhoJ1 < 0 || caminhoJ2 < 0)
+    {
         perror("Erro ao abrir pipes");
         exit(1);
     }
@@ -20,16 +22,31 @@ int main() {
     char peca = 'O';
     int linha, coluna;
 
-    while (1) {
+    while (1)
+    {
         char buffer;
         int bytesRead = read(caminhoJ1, &buffer, 1);
-        if (bytesRead > 0 && buffer == 'V') {
+        if (bytesRead > 0 && buffer == 'V')
+        {
+            bytesRead = read(caminhoJ1, Tabuleiro, sizeof(Tabuleiro));
+            if (bytesRead > 0)
+            {
+                system("clear");
+                printf("Tabuleiro final:\n");
+                printJogo(Tabuleiro);
+            }
             printf("Jogador 1 (X) ganhou!\n");
+
+            int fd = open("pipe_jogadores_menu", O_WRONLY);
+            write(fd, "1", 1);
+            close(fd);
+
             break;
         }
 
         bytesRead = read(caminhoJ1, Tabuleiro, sizeof(Tabuleiro));
-        if (bytesRead <= 0) {
+        if (bytesRead <= 0)
+        {
             printf("Erro ou fim de jogo.\n");
             break;
         }
@@ -46,7 +63,8 @@ int main() {
         scanf("%d", &coluna);
         coluna--;
 
-        if (!colocar_peca(Tabuleiro, linha, coluna, peca)) {
+        if (!colocar_peca(Tabuleiro, linha, coluna, peca))
+        {
             printf("Posição já ocupada\n");
             sleep(1);
             continue;
@@ -56,7 +74,8 @@ int main() {
         printf("Jogador 2: Jogada feita na linha %d, coluna %d\n", linha, coluna);
         printJogo(Tabuleiro);
 
-        if (verificar_vitoria(Tabuleiro, peca)) {
+        if (verificar_vitoria(Tabuleiro, peca))
+        {
             printf("Jogador 2 (O) ganhou!\n");
             char vitoria = 'V';
             write(caminhoJ2, &vitoria, 1);
@@ -65,10 +84,12 @@ int main() {
             write(fd, "2", 1);
             close(fd);
 
-            execl("./menu", "menu", NULL);
-            perror("Erro ao voltar ao menu");
-            exit(1);
-        } else {
+            sleep(1); // Dá tempo ao adversário para ler o pipe
+
+            break;
+        }
+        else
+        {
             char semVitoria = 'C';
             write(caminhoJ2, &semVitoria, 1);
         }
@@ -77,7 +98,8 @@ int main() {
         sleep(1);
     }
 
-    execl("./menu", "menu", NULL);
-    perror("Erro ao voltar ao menu");
-    return 0;
+    close(caminhoJ1);
+    close(caminhoJ2);
+
+    exit(0);
 }

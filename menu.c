@@ -39,6 +39,24 @@ int main() {
                 write(fd1w, "1", 1);
                 close(fd1w);
             }
+
+            // --- LER O PIPE DE VITÓRIA ANTES DO WAITPID ---
+            int pipe_vitorias = open(PIPE2, O_RDONLY);
+            if (pipe_vitorias < 0) {
+                perror("Erro ao abrir pipe de vitórias");
+            } else {
+                if (read(pipe_vitorias, &buffer, 1) > 0) {
+                    if (buffer == '1') {
+                        printf("\n>> Jogador 1 venceu!\n");
+                        vitoriasJ1++;
+                    } else if (buffer == '2') {
+                        printf("\n>> Jogador 2 venceu!\n");
+                        vitoriasJ2++;
+                    }
+                }
+                close(pipe_vitorias);
+            }
+
             waitpid(pid, NULL, 0); // espera jogador1 terminar
 
         } else if (escolha == 2) {
@@ -48,28 +66,29 @@ int main() {
                 perror("Erro jogador2");
                 exit(1);
             }
+
+            // --- LER O PIPE DE VITÓRIA ANTES DO WAITPID ---
+            int pipe_vitorias = open(PIPE2, O_RDONLY);
+            if (pipe_vitorias < 0) {
+                perror("Erro ao abrir pipe de vitórias");
+            } else {
+                if (read(pipe_vitorias, &buffer, 1) > 0) {
+                    if (buffer == '1') {
+                        printf("\n>> Jogador 1 venceu!\n");
+                        vitoriasJ1++;
+                    } else if (buffer == '2') {
+                        printf("\n>> Jogador 2 venceu!\n");
+                        vitoriasJ2++;
+                    }
+                }
+                close(pipe_vitorias);
+            }
+
             waitpid(pid, NULL, 0); // espera jogador2 terminar
 
         } else {
             printf("Opção inválida\n");
             continue;
-        }
-
-        // Abrir o pipe de vitórias após os jogadores terminarem (modo bloqueante)
-        int pipe_vitorias = open(PIPE2, O_RDONLY);
-        if (pipe_vitorias < 0) {
-            perror("Erro ao abrir pipe de vitórias");
-        } else {
-            if (read(pipe_vitorias, &buffer, 1) > 0) {
-                if (buffer == '1') {
-                    printf("\n>> Jogador 1 venceu!\n");
-                    vitoriasJ1++;
-                } else if (buffer == '2') {
-                    printf("\n>> Jogador 2 venceu!\n");
-                    vitoriasJ2++;
-                }
-            }
-            close(pipe_vitorias);
         }
     }
 
