@@ -73,6 +73,17 @@ int verificar_vitoria(char tabuleiro[linhas][colunas], char jogador)
     return 0;
 }
 
+int verificar_empate(char tabuleiro[linhas][colunas]) {
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < colunas; j++) {
+            if (tabuleiro[i][j] != 'X' && tabuleiro[i][j] != 'O') {
+                return 0; 
+            }
+        }
+    }
+    return 1;
+}
+
 
 void textcolor(int attr, int fg, int bg)
 {

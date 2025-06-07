@@ -29,20 +29,34 @@ int main()
         printf("Jogo do Galo\n(Você é o X)\n");
         printJogo(Tabuleiro);
 
-        printf("Jogador 1 (X), escolha a linha (1-3): ");
-        scanf("%d", &linha);
-        linha--;
-
-        printf("Escolha a coluna (1-3): ");
-        scanf("%d", &coluna);
-        coluna--;
-
-        if (!colocar_peca(Tabuleiro, linha, coluna, peca))
+        int jogada_valida = 0;
+        do
         {
-            printf("Posição já ocupada\n");
-            sleep(1);
-            continue;
-        }
+
+            printf("Jogador 1 (X), escolha a linha (1-3): ");
+            scanf("%d", &linha);
+            linha--;
+
+            printf("Escolha a coluna (1-3): ");
+            scanf("%d", &coluna);
+            coluna--;
+
+            if (linha < 0 || linha >= linhas || coluna < 0 || coluna >= colunas)
+            {
+                printf("Coordenadas inválidas! Tente novamente.\n");
+                sleep(1);
+                continue;
+            }
+
+            if (!colocar_peca(Tabuleiro, linha, coluna, peca))
+            {
+                printf("Posição já ocupada\n");
+                sleep(1);
+                continue;
+            }
+
+            jogada_valida = 1;
+        } while (!jogada_valida);
 
         system("clear");
         printf("Jogador 1: Jogada feita na linha %d, coluna %d\n", linha, coluna);
@@ -61,7 +75,8 @@ int main()
 
             // Enviar resultado ao menu
             int fd = open("pipe_jogadores_menu", O_WRONLY);
-            if (fd >= 0) {
+            if (fd >= 0)
+            {
                 write(fd, "1", 1);
                 close(fd);
             }
@@ -72,6 +87,23 @@ int main()
             close(caminhoJ1);
             close(caminhoJ2);
             exit(0); // termina imediatamente!
+        }
+        else if (verificar_empate(Tabuleiro))
+        {
+            printf("Empate!\n");
+            char empate = 'E';
+            write(caminhoJ1, &empate, 1);
+            write(caminhoJ1, Tabuleiro, sizeof(Tabuleiro));
+            int fd = open("pipe_jogadores_menu", O_WRONLY);
+            if (fd >= 0)
+            {
+                write(fd, "E", 1);
+                close(fd);
+            }
+            sleep(1);
+            close(caminhoJ1);
+            close(caminhoJ2);
+            exit(0);
         }
         else
         {
@@ -85,8 +117,9 @@ int main()
 
         char buffer;
         int bytesRead = read(caminhoJ2, &buffer, 1);
-        if (bytesRead == 0) {
-            // EOF detectado: adversário fechou pipe, sair
+        if (bytesRead == 0)
+        {
+            // adversário fechou pipe, sair
             printf("Adversário terminou o jogo.\n");
             break;
         }
@@ -103,8 +136,33 @@ int main()
 
             // Enviar resultado ao menu
             int fd = open("pipe_jogadores_menu", O_WRONLY);
-            if (fd >= 0) {
+            if (fd >= 0)
+            {
                 write(fd, "2", 1);
+                close(fd);
+            }
+
+            close(caminhoJ1);
+            close(caminhoJ2);
+            exit(0);
+        }
+
+        if (bytesRead > 0 && buffer == 'E')
+        {
+            bytesRead = read(caminhoJ2, Tabuleiro, sizeof(Tabuleiro));
+            if (bytesRead > 0)
+            {
+                system("clear");
+                printf("Tabuleiro final:\n");
+                printJogo(Tabuleiro);
+            }
+            printf("Empate!\n");
+
+            // Enviar resultado ao menu, se quiseres
+            int fd = open("pipe_jogadores_menu", O_WRONLY);
+            if (fd >= 0)
+            {
+                write(fd, "E", 1);
                 close(fd);
             }
 

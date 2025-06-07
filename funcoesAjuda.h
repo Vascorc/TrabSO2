@@ -16,5 +16,6 @@ void printJogo(char Tabuleiro[linhas][colunas]);
 int colocar_peca(char Tabuleiro[linhas][colunas], int linha, int coluna, char peca);
 int verificar_vitoria(char tabuleiro[linhas][colunas], char jogador);
 void textcolor (int attr, int fg, int bg);
+int verificar_empate(char tabuleiro[linhas][colunas]);
 
 #endif

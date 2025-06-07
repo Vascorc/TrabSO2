@@ -17,29 +17,29 @@ int main() {
     mkfifo(PIPE2, 0666);
 
     int vitoriasJ1 = 0, vitoriasJ2 = 0;
-    int jogadorInicial = 1; 
+    int jogador; 
 
     system("clear");
     printf("\n=== MENU DO JOGO ===\n");
-    printf("Quem começa sempre?\n");
+    printf("Que número queres ser?\n");
     printf("1. Jogador 1\n2. Jogador 2\nOpção: ");
-    scanf("%d", &jogadorInicial);
-    if (jogadorInicial != 1 && jogadorInicial != 2) {
+    scanf("%d", &jogador);
+    if (jogador != 1 && jogador != 2) {
         printf("Opção inválida. Por defeito começa o Jogador 1.\n");
-        jogadorInicial = 1;
+        jogador = 1;
     }
 
     while (1) {
         system("clear");
-        printf("\n=== RESULTADOS ===\n");
-        printf("Vitórias - Jogador 1: %d | Jogador 2: %d\n", vitoriasJ1, vitoriasJ2);
-        printf("Jogador a começar sempre: %d\n", jogadorInicial);
+        printf("=== RESULTADOS ===\n");
+        printf("Jogador 1: %d | Jogador 2: %d\n", vitoriasJ1, vitoriasJ2);
+        printf("==================\n");
         printf("1. Jogar\n2. Novo jogo (pontuação a zeros)\n3. Sair\nOpção: ");
         int op;
         scanf("%d", &op);
 
         if (op == 1) {
-            jogar(jogadorInicial, &vitoriasJ1, &vitoriasJ2);
+            jogar(jogador, &vitoriasJ1, &vitoriasJ2);
         } else if (op == 2) {
             vitoriasJ1 = 0;
             vitoriasJ2 = 0;
@@ -102,6 +102,8 @@ void jogar(int jogador, int *vitoriasJ1, int *vitoriasJ2) {
             } else if (buffer == '2') {
                 printf("\n>> Jogador 2 venceu!\n");
                 (*vitoriasJ2)++;
+            } else if (buffer == 'E') {
+                printf("\n>> Empate!\n");
             }
         }
         close(pipe_vitorias);
